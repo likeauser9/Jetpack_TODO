@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +18,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
@@ -89,6 +92,9 @@ fun ListScreen() {
     var tasks_my by remember { mutableStateOf(listOf("Buy groceries", "Study Kotlin", "Workout")) }
     var newTask by remember { mutableStateOf("") }
 
+    var selectedColor by remember { mutableStateOf(Color.Blue) }
+    var selectedCategory by remember { mutableStateOf("General") }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -123,7 +129,8 @@ fun ListScreen() {
 //                }
 //            }
             FloatingActionButton(onClick = { isModalOpen = true }) {
-                Text("+")
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+//                Text("+")
             }
         },
         content = {
@@ -298,16 +305,53 @@ fun ListScreen() {
                         }
                     },
                     text = {
-                        OutlinedTextField(
-                            value = newTask,
-                            onValueChange = { newTask = it },
-                            label = { Text("New Task") }
-                        )
+                        Column {
+                            Text(text = "Enter a task", fontSize = 25.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = newTask,
+                                onValueChange = { newTask = it },
+                                label = { Text("New Task") }
+                            )
+                            Text("Select Color:")
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                                listOf(Color.Blue, Color.Green, Color.Red, Color.Yellow, Color.Cyan).forEach { color ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(color, CircleShape)
+                                            .clickable { selectedColor = color }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Category:")
+                            DropdownMenuExample(selectedCategory) { selectedCategory = it }
+                        }
                     }
                 )
             }
         }
     )
+}
+
+@Composable
+fun DropdownMenuExample(selectedCategory: String, onCategorySelected: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val categories = listOf("General", "Work", "Personal", "Urgent")
+    Box(modifier = Modifier.fillMaxWidth()) {
+        TextButton(onClick = { expanded = true }) {
+            Text(selectedCategory)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            categories.forEach { category ->
+                DropdownMenuItem(text = { Text(category) }, onClick = {
+                    onCategorySelected(category)
+                    expanded = false
+                })
+            }
+        }
+    }
 }
 
 @Composable
@@ -372,7 +416,7 @@ fun TaskItem(task: String) {
             },
             text = {
                 Column {
-                    Text(text = "Enter a details", fontSize = 30.sp)
+                    Text(text = "Enter a details", fontSize = 25.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = newTask,
